@@ -1,29 +1,140 @@
-This is a [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) project bootstrapped with [`create-rainbowkit`](/packages/create-rainbowkit).
+# TaskOn White-label Wallet Connection Demo
 
-## Getting Started
+A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.
 
-First, run the development server:
+## Development Setup
+
+### Install Dependencies
+
+```bash
+pnpm install
+```
+
+### Configure WalletConnect
+
+1. Visit [WalletConnect Cloud](https://cloud.walletconnect.com/)
+2. Create a new project to get your Project ID
+3. Replace `YOUR_PROJECT_ID` in `src/wagmi.ts`:
+
+```typescript
+export const config = getDefaultConfig({
+  appName: 'TaskOn Wallet Demo',
+  projectId: 'your-actual-project-id', // Replace this
+  chains: [/*...*/],
+  ssr: true,
+});
+```
+
+### Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Build and Deployment
+
+### 1. Build Static Files
+
+```bash
+npm run build
+```
+
+After building, static files will be generated in the `out/` directory.
+
+### 2. Deployment Options
+
+#### 🌐 Netlify
+
+1. Drag the `out/` directory to [Netlify Drop](https://app.netlify.com/drop)
+2. Or connect your Git repository with build command `npm run build` and publish directory `out`
+
+#### 📁 GitHub Pages
+
+1. Push `out/` directory contents to `gh-pages` branch
+2. Enable GitHub Pages in repository settings
+
+```bash
+# Example deployment script
+npm run build
+cd out
+git init
+git add -A
+git commit -m "Deploy"
+git push -f git@github.com:username/repo.git main:gh-pages
+```
+
+#### ☁️ AWS S3 + CloudFront
+
+```bash
+# After installing AWS CLI
+npm run build
+aws s3 sync out/ s3://your-bucket-name --delete
+```
+
+#### 🐋 Docker
+
+```dockerfile
+FROM nginx:alpine
+COPY out/ /usr/share/nginx/html/
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+#### 📦 Traditional Server
+
+Upload `out/` directory contents to any web server that supports static files.
+
+### 3. Deployment Configuration
+
+The project is configured for full static export:
+
+- `output: 'export'` - Enable static export
+- `trailingSlash: true` - Ensure route compatibility
+- `images: { unoptimized: true }` - Disable image optimization (required for static deployment)
+
+### 4. Environment Variables (Optional)
+
+To enable test networks, set the environment variable:
+
+```bash
+NEXT_PUBLIC_ENABLE_TESTNETS=true
+```
+
+## Project Structure
+
+```
+taskon-whitelabel-demo/
+├── src/
+│   ├── pages/
+│   │   ├── _app.tsx      # App entry, RainbowKit configuration
+│   │   └── index.tsx     # Main page
+│   ├── styles/           # Style files
+│   └── wagmi.ts          # Wagmi configuration
+├── out/                  # Build output directory (generated after build)
+├── next.config.js        # Next.js configuration
+└── package.json
+```
+
+## Tech Stack
+
+- **Framework**: Next.js 15
+- **Wallet Connection**: RainbowKit 2.2+
+- **Ethereum Interaction**: wagmi 2.15+
+- **Query Management**: TanStack Query 5.55+
+- **Type Support**: TypeScript 5.5+
+
+## Supported Wallets
+
+- MetaMask
+- All wallets supporting WalletConnect protocol
+- Coinbase Wallet
+- Rainbow Wallet
+- And more...
 
 ## Learn More
 
-To learn more about this stack, take a look at the following resources:
-
-- [RainbowKit Documentation](https://rainbowkit.com) - Learn how to customize your wallet connection flow.
-- [wagmi Documentation](https://wagmi.sh) - Learn how to interact with Ethereum.
-- [Next.js Documentation](https://nextjs.org/docs) - Learn how to build a Next.js application.
-
-You can check out [the RainbowKit GitHub repository](https://github.com/rainbow-me/rainbowkit) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- [RainbowKit Documentation](https://rainbowkit.com) - Learn how to customize your wallet connection flow
+- [wagmi Documentation](https://wagmi.sh) - Learn how to interact with Ethereum
+- [Next.js Documentation](https://nextjs.org/docs) - Learn how to build Next.js applications
