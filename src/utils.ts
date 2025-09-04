@@ -55,7 +55,6 @@ export const signMessageNode = (clientId: string, loginType: LoginType, value: s
   const timestamp = Date.now();
   const message = `${loginType}|${value}|${clientId}|${timestamp}`;
     // Use dynamic require to avoid bundling Node 'crypto' into browser builds
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { sign } = require('crypto') as typeof import('crypto');
     const privateKeyBuffer = Buffer.from(TEST_PK_BASE64, 'base64');
     const signature = sign('RSA-SHA256', new TextEncoder().encode(message), {
