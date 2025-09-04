@@ -1,6 +1,9 @@
 # TaskOn White-label Wallet Connection Demo
 
-A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.
+A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.  
+
+https://whitelabel-demo-rainbowkit.taskon.xyz/  
+https://whitelabel.wode.tech/  
 
 ## Development Setup
 
