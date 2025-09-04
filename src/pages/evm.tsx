@@ -24,7 +24,7 @@ const EvmDemo: NextPage = () => {
     const embed = new TaskOnEmbed({
       clientId: 'dG9rZW4tdGVzdC1yYW5kb20tc3RyaW5nMTIzNDU2Nzg5',
       // baseUrl: 'http://localhost:5173',
-      baseUrl: 'https://whitelabel.wode.tech/',
+      baseUrl: 'https://whitelabel.wode.tech',
       containerElement: containerRef.current,
       width: '100%',
       height: '100%'
