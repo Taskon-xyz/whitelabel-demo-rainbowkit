@@ -18,8 +18,8 @@ importers:
         specifier: ^5.55.3
         version: 5.85.5(react@19.1.1)
       '@taskon/embed':
-        specifier: link:../taskon-embed
-        version: link:../taskon-embed
+        specifier: ^0.0.1
+        version: 0.0.1
       next:
         specifier: ^15.3.3
         version: 15.5.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -711,6 +711,9 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
+  '@taskon/embed@0.0.1':
+    resolution: {integrity: sha512-EMaOAtryvU0MyYhGblKFo2bkpc/7KR7dKXGc5EA3pF+h6HGKxOebb22VzfoWA/8B+px8sB8M8CViEpgCDmrkvg==}
+
   '@tybys/wasm-util@0.10.0':
     resolution: {integrity: sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==}
 
@@ -719,6 +722,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@types/eventemitter3@1.2.0':
+    resolution: {integrity: sha512-qB+RJcqIM5b8/CfmjqiBylK2KxBGKpRlewjsfq+IVFrDhclWO9JodK4g3NbY0Kpf/3CcLbz+tHMH6bxJEw0Z3A==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2339,6 +2345,9 @@ packages:
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
+
+  penpal@7.0.4:
+    resolution: {integrity: sha512-O+M2V83oSaWQRDHghxYsq23TQgjAEzlrwemS0a1md16wZWqgOgmB35u4zluMwyqF6GnF/XT4v0N4QrrRgWAgSQ==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -4128,6 +4137,12 @@ snapshots:
       '@tanstack/query-core': 5.85.5
       react: 19.1.1
 
+  '@taskon/embed@0.0.1':
+    dependencies:
+      '@types/eventemitter3': 1.2.0
+      eventemitter3: 5.0.1
+      penpal: 7.0.4
+
   '@tybys/wasm-util@0.10.0':
     dependencies:
       tslib: 2.8.1
@@ -4138,6 +4153,8 @@ snapshots:
       '@types/ms': 2.1.0
 
   '@types/estree@1.0.8': {}
+
+  '@types/eventemitter3@1.2.0': {}
 
   '@types/json-schema@7.0.15': {}
 
@@ -6410,6 +6427,8 @@ snapshots:
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
+
+  penpal@7.0.4: {}
 
   picocolors@1.1.1: {}
 
