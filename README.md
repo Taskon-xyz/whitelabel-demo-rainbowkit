@@ -1,9 +1,11 @@
 # TaskOn White-label Wallet Connection Demo
 
-A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.  
+A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.
 
-https://whitelabel-demo-rainbowkit.taskon.xyz/  
-https://whitelabel.wode.tech/  
+## Demo URLs
+- Production Demo: https://whitelabel-demo-rainbowkit.taskon.xyz/
+- TaskOn White-label: https://whitelabel.wode.tech/
+- OAuth Service: https://generalauthservice.com/  
 
 ## Development Setup
 
@@ -12,6 +14,23 @@ https://whitelabel.wode.tech/
 ```bash
 pnpm install
 ```
+
+### Configure Environment Variables
+
+1. **For local development** (connecting to localhost:5173):
+   ```bash
+   # Copy the example file
+   cp .env.local.example .env.local
+   
+   # .env.local will contain:
+   # NEXT_PUBLIC_TASKON_BASE_URL=http://localhost:5173
+   ```
+
+2. **For production** (connecting to https://whitelabel.wode.tech):
+   - The `.env` file is already configured with production URLs
+   - No action needed unless you want to override
+
+> **Note**: `.env.local` takes precedence over `.env` when both exist
 
 ### Configure WalletConnect
 
@@ -36,88 +55,99 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to see the result.
 
+## OAuth Configuration
+
+The TaskOn white-label solution uses a universal OAuth authorization service for social login integrations.
+
+### OAuth Service URL
+```
+https://generalauthservice.com/
+```
+
+### OAuth Provider Configuration
+
+When setting up OAuth applications for your white-label deployment, configure the following callback URLs in each provider's developer console:
+
+#### Twitter/X
+- **Callback URL**: `https://generalauthservice.com/callback/twitter`
+- **Developer Console**: [https://developer.twitter.com/en/apps](https://developer.twitter.com/en/apps)
+
+#### Discord
+- **Redirect URI**: `https://generalauthservice.com/callback/discord`
+- **Developer Portal**: [https://discord.com/developers/applications](https://discord.com/developers/applications)
+
+#### Telegram
+- **Domain**: `generalauthservice.com`
+- **Bot Father**: [@BotFather](https://t.me/botfather)
+
+#### Reddit
+- **Redirect URI**: `https://generalauthservice.com/callback/reddit`
+- **App Preferences**: [https://www.reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
+
+#### YouTube/Google
+- **Authorized redirect URI**: `https://generalauthservice.com/callback/youtube`
+- **Google Cloud Console**: [https://console.cloud.google.com/](https://console.cloud.google.com/)
+
+### OAuth Flow
+1. User initiates OAuth login from your white-label site
+2. Request is routed through the general auth service
+3. User completes authentication with the social provider
+4. Provider redirects to `https://generalauthservice.com/callback/{provider}`
+5. Auth service redirects back to your white-label site with credentials
+
 ## Build and Deployment
 
-### 1. Build Static Files
+### Build Commands
 
 ```bash
+# Install dependencies
+pnpm install
+
+# Build for production
 npm run build
+
+# Output: Static files will be generated in the 'out' directory
 ```
 
-After building, static files will be generated in the `out/` directory.
+The project is configured for full static export. After running `npm run build`, deploy the `out` directory to your server.
 
-### 2. Deployment Options
+## Environment Variables
 
-#### 🌐 Netlify
-
-1. Drag the `out/` directory to [Netlify Drop](https://app.netlify.com/drop)
-2. Or connect your Git repository with build command `npm run build` and publish directory `out`
-
-#### 📁 GitHub Pages
-
-1. Push `out/` directory contents to `gh-pages` branch
-2. Enable GitHub Pages in repository settings
+### Available Environment Variables:
 
 ```bash
-# Example deployment script
-npm run build
-cd out
-git init
-git add -A
-git commit -m "Deploy"
-git push -f git@github.com:username/repo.git main:gh-pages
+# TaskOn SDK Configuration
+NEXT_PUBLIC_TASKON_BASE_URL  # TaskOn iframe URL (default: https://whitelabel.wode.tech)
+NEXT_PUBLIC_TASKON_CLIENT_ID # Client ID for authentication
+
+# Test Networks
+NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable test networks
 ```
 
-#### ☁️ AWS S3 + CloudFront
-
-```bash
-# After installing AWS CLI
-npm run build
-aws s3 sync out/ s3://your-bucket-name --delete
-```
-
-#### 🐋 Docker
-
-```dockerfile
-FROM nginx:alpine
-COPY out/ /usr/share/nginx/html/
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-#### 📦 Traditional Server
-
-Upload `out/` directory contents to any web server that supports static files.
-
-### 3. Deployment Configuration
-
-The project is configured for full static export:
-
-- `output: 'export'` - Enable static export
-- `trailingSlash: true` - Ensure route compatibility
-- `images: { unoptimized: true }` - Disable image optimization (required for static deployment)
-
-### 4. Environment Variables (Optional)
-
-To enable test networks, set the environment variable:
-
-```bash
-NEXT_PUBLIC_ENABLE_TESTNETS=true
-```
+### Environment Files Priority:
+1. `.env.local` - Local overrides (git ignored)
+2. `.env` - Default production values (committed to git)
 
 ## Project Structure
 
 ```
-taskon-whitelabel-demo/
+whitelabel-demo-rainbowkit/
 ├── src/
+│   ├── components/
+│   │   └── EmailModal.tsx  # Email login modal component
 │   ├── pages/
-│   │   ├── _app.tsx      # App entry, RainbowKit configuration
-│   │   └── index.tsx     # Main page
-│   ├── styles/           # Style files
-│   └── wagmi.ts          # Wagmi configuration
-├── out/                  # Build output directory (generated after build)
-├── next.config.js        # Next.js configuration
-└── package.json
+│   │   ├── _app.tsx        # App entry, RainbowKit configuration
+│   │   ├── index.tsx       # Landing page
+│   │   ├── evm.tsx         # EVM wallet demo page
+│   │   └── email.tsx       # Email login demo page
+│   ├── styles/             # Global styles
+│   ├── utils.ts            # Utility functions (signature generation)
+│   └── wagmi.ts            # Wagmi configuration
+├── out/                    # Build output directory (generated after build)
+├── .env                    # Production environment variables
+├── .env.local.example      # Local development environment template
+├── next.config.js          # Next.js configuration
+└── package.json            # Project dependencies
 ```
 
 ## Tech Stack
