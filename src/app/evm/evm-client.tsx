@@ -39,7 +39,8 @@ export default function EvmClient() {
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
       containerElement: containerRef.current,
       width: '100%',
-      height: '100%'
+      height: '100%',
+      oauthToolUrl: 'https://stage.generalauthservice.com'
     });
 
     const handleLoginRequired = () => {
