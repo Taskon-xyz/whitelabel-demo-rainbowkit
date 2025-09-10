@@ -40,6 +40,14 @@ export default function EmailClient() {
       oauthToolUrl: 'https://stage.generalauthservice.com'
     });
 
+    const handleRouteChanged = (fullPath: string) => {
+      console.log('TaskOn route changed:', fullPath);
+      // You can synchronize and update the parent page's URL or state here
+      // Example: window.history.replaceState(null, '', `/email${fullPath}`);
+    };
+    
+    embed.on('routeChanged', handleRouteChanged);
+    
     console.log('embed', embed);
     embed.init().then(() => {
       embedRef.current = embed;

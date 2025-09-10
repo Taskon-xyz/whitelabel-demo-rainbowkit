@@ -47,8 +47,15 @@ export default function EvmClient() {
       console.log('TaskOn loginRequired event triggered');
       openConnectModal?.();
     };
+    
+    const handleRouteChanged = (fullPath: string) => {
+      console.log('TaskOn route changed:', fullPath);
+      // You can synchronize and update the parent page's URL or state here
+      // Example: window.history.replaceState(null, '', `/evm${fullPath}`);
+    };
 
     embed.on('loginRequired', handleLoginRequired);
+    embed.on('routeChanged', handleRouteChanged);
 
     // Initialize the embed
     embed.init().then(() => {
