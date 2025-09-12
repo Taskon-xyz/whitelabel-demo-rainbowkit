@@ -35,11 +35,8 @@ export default function EvmClient() {
     console.log('Initializing TaskOn embed...');
     
     const embed = new TaskOnEmbed({
-      clientId: process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!,
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
       containerElement: containerRef.current,
-      width: '100%',
-      height: '100%',
       oauthToolUrl: 'https://stage.generalauthservice.com'
     });
 
