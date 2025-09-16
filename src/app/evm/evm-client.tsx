@@ -108,7 +108,7 @@ export default function EvmClient() {
       } else {
         // No auth cache, get signature first then login
         const clientId = process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!;
-        const { signature, timestamp } = await signMessage(clientId, 'WalletAddress', address);
+        const { signature, timestamp } = await signMessage(clientId, 'evm', address);
           
         await embedRef.current.login({
           type: 'WalletAddress',

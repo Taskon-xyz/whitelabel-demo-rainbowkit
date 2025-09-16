@@ -1,19 +1,18 @@
-import { AuthType } from "@taskon/embed";
 
 // PKCS#1 private key in base64 format (matches Go code format)
 const TEST_PK_BASE64 = 'MIIEogIBAAKCAQEAs9DTJhLwRolCSMlvQbc37L027g9DvCWdFjtokaj/Y/7iy9nI/EfIFOL8bMXHAJhEmSYLxVW+NXgsXXCpxzaAEhTvaRMiokDsXYhg8PV3OD79eLM17r2zQqk4mOfYipyyTauc5mb3EwCjN9T0VQRjuAbPvfPuWgyeHBDzyDqZNJh/WKXnO6f9/VXR527udSkHNutGIxGE/wIWZhcWBIg3P75MRE6lRKe4rjE9E3r153XLcZ4lPjZj7Q/9rtjQupH4uNErfwSEQoX7b2KfTuCs+75Z/x7VGj5hzhS2eUv6b1S2EO3rT31x0Pxxi62VBEXJgyhorSsND53lBtFBYHSxVwIDAQABAoIBAFTpWiQjElKEs4fSk1aZce+5pCxDig1ZR7Y9ZJJQFxW9wZRYqeez7+ApFeE5fdEillYpmKpdZH40WuLe9lVLv6uKNknMjvDGrrc2VOzERUGKwUAThHbSHsnuRfsylFdUSoCR9vv4CFlxViHhzmUtNveqQ8Rj4ZylU65WNQBK55jlVOj7Vplqv67YzeK5TY5m0oz43b6rwqMMj3lHZxjVrPXmmwhA5OxsvJZq47qrYbE9xMfmoI9/vj+cQ93Iyxnrrwaauulg9ljr8XRrUcoCZ/Up55/CIHmlXhA/xJfTLEnDwt8LAOY8YHHZnFRIGnRdMQ/OgbD0SMXx9UroXMta1sECgYEA6iiQTvfyMUKYYuRIqH27Lg3qemYVJfixqSHN48wut/LvmQ/ngfmpioMBjsjZC55P2FMBlTs+y6T/DmGyaL66y6rqeJkAYBclcjk6qjV5u1jy0sBKhHpfopn7kGy0nHrb+ZUpWlEPVDbIAU3Wtx09Rhh83jkuMV6Igspvgd7AgcECgYEAxJaeaPqtYc7XWi3JTid4XMudwKUjLEXe+rIaVO6Rl4YvpSffDXGZ+fqZtPiCs59ze9Bu1scz+6rkexhJOFwSQ4w+GOeY4Su1r4Mrw9YYQ6tkDw8id7IEJbfmCWs0fn5iG1yUOp+H1x04u/tHVPu+zS/iT2yDnM0oM2NZrEBpSRcCgYBCUDqOIqn0SWfemcf576GS6V3+S+qxVjz6KRil6q1Qavxv3JEzvgDFuVQ3m6ncIHl8SgWovZ6LDa8t430jLOC5zS2Z+bqhe+ye7JYwnfRbmlUqWkrAOefbpMAZpq9/oUuq4xNTAKHWt6zssZ6dPSqdL1ItnQP3902xvKLXpL3gAQKBgG7eArhxpxZh8FGLQNwypk6vBmh+uTdesEHx76e2Y6Vwp64crk6Goq+4BLdq70sdwaMyCVBXR5nG5tQE/kYqpqIxlVO2SSGz5OL2ttfbBhQjtGpJvsaCPpSHAdSOASzVWb7Ul0P4dEN812IsdC4ZS6GsP5VLPW5QxTs17HyYVshBAoGAJt0S2gBc+Z/PhbZXUP6dypf5ik3xnXBsBl6/FnJWAMgdVCSQMOGKsemXNsUFnWIRwi4tO6OeMBmOrPKelaz1KOINPQRPv6Lwuwck1ZMJvnV3noQ884LplZjjTbfkkK4LN8CAPnGvOLPubmm4ZacdFHHb8n+F8L6fyn1Ys5Yoyvc=';
 
-export const signMessage = async (clientId: string, authType: AuthType, value: string): Promise<{
+export const signMessage = async (clientId: string, type: 'Email' | 'evm', value: string): Promise<{
   signature: string;
   timestamp: number;
 }> => {
   const timestamp = Date.now();
-  const message = `${authType}|${value}|${clientId}|${timestamp}`;
+  const message = `${type}|${value}|${clientId}|${timestamp}`;
   console.log('sign source message', message);
 
   // If running in Node or WebCrypto not available, fallback to Node signer
   if (typeof window === 'undefined' || !(globalThis.crypto && (globalThis.crypto as Crypto).subtle)) {
-    return signMessageNode(clientId, authType, value);
+    return signMessageNode(clientId, type, value);
   }
 
   // Browser: use WebCrypto SubtleCrypto with RSASSA-PKCS1-v1_5 and SHA-256
@@ -48,12 +47,12 @@ export const signMessage = async (clientId: string, authType: AuthType, value: s
 /**
  * Sign message with Node.js
  */
-export const signMessageNode = (clientId: string, authType: AuthType, value: string): {
+export const signMessageNode = (clientId: string, type: 'Email' | 'evm', value: string): {
   signature: string;
   timestamp: number;
 } => {
   const timestamp = Date.now();
-  const message = `${authType}|${value}|${clientId}|${timestamp}`;
+  const message = `${type}|${value}|${clientId}|${timestamp}`;
     // Use dynamic require to avoid bundling Node 'crypto' into browser builds
     const { sign } = require('crypto') as typeof import('crypto');
     const privateKeyBuffer = Buffer.from(TEST_PK_BASE64, 'base64');
