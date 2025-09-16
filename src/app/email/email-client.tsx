@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { TaskOnEmbed } from '@taskon/embed';
+import { TaskOnEmbed, trackVisit } from '@taskon/embed';
 import { signMessage } from '../../utils';
 import EmailModal from '../../components/EmailModal';
 
@@ -15,6 +15,12 @@ export default function EmailClient() {
   const [isEmbedInitialized, setIsEmbedInitialized] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Track page visit on component mount (for conversion analytics)
+  useEffect(() => {
+    // Only call if you need TaskOn conversion rate analysis
+    trackVisit('Email', currentEmail || undefined);
+  }, []); // Only run once on mount
 
   useEffect(() => {
     const savedLoginState = localStorage.getItem('taskon_email_login_state');
@@ -78,7 +84,7 @@ export default function EmailClient() {
       console.log('Logging in with email:', email);
       
       await embedRef.current.login({
-        type: 'email',
+        type: 'Email',
         account: email,
         signature: signature,
         timestamp: timestamp,

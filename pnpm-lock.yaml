@@ -18,8 +18,8 @@ importers:
         specifier: ^5.55.3
         version: 5.85.5(react@19.1.1)
       '@taskon/embed':
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: ^0.0.8
+        version: 0.0.8
       next:
         specifier: ^15.3.3
         version: 15.5.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -713,8 +713,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@taskon/embed@0.0.6':
-    resolution: {integrity: sha512-MJBvQzOdwx3lbpby+Y/r7aSjzfcprCQ7jrPd0DEA+6oMzDNDPexzmtqKlpjrO/K05bdPaQN9UssE1k45rDvLSw==}
+  '@taskon/embed@0.0.8':
+    resolution: {integrity: sha512-hpBqv9/MZ8e141/WNoVjlFDyKRLuBB/CNwtzj0d0IbE3sN2Sk2IoiaX73ri3/TtDbPaJUUmGbhnGLHZYIkhehQ==}
 
   '@tybys/wasm-util@0.10.0':
     resolution: {integrity: sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==}
@@ -4142,7 +4142,7 @@ snapshots:
       '@tanstack/query-core': 5.85.5
       react: 19.1.1
 
-  '@taskon/embed@0.0.6':
+  '@taskon/embed@0.0.8':
     dependencies:
       '@types/eventemitter3': 1.2.0
       eventemitter3: 5.0.1

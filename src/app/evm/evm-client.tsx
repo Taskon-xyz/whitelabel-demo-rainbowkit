@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
-import { TaskOnEmbed, LoginType } from '@taskon/embed';
+import { TaskOnEmbed, AuthType, trackVisit } from '@taskon/embed';
 import { signMessage } from '../../utils';
 
 export default function EvmClient() {
@@ -17,6 +17,12 @@ export default function EvmClient() {
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const { data: walletClient } = useWalletClient();
+
+  // Track page visit on component mount (for conversion analytics)
+  useEffect(() => {
+    // Only call if you need TaskOn conversion rate analysis
+    trackVisit('WalletAddress', address || undefined);
+  }, []); // Only run once on mount
 
   useEffect(() => {
     const savedLoginState = localStorage.getItem('taskon_evm_login_state');
@@ -84,10 +90,10 @@ export default function EvmClient() {
     try {
       console.log('Logging in with EVM wallet:', address);
       const clientId = process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!;
-      const { signature, timestamp } = await signMessage(clientId, 'evm', address);
+      const { signature, timestamp } = await signMessage(clientId, 'WalletAddress', address);
         
       await embedRef.current.login({
-        type: 'evm',
+        type: 'WalletAddress',
         account: address,
         signature: signature,
         timestamp: timestamp,
