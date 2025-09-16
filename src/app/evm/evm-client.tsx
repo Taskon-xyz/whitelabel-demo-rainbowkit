@@ -18,11 +18,16 @@ export default function EvmClient() {
   const { openConnectModal } = useConnectModal();
   const { data: walletClient } = useWalletClient();
 
-  // Track page visit on component mount (for conversion analytics)
+  // Track page visit when address is available
   useEffect(() => {
     // Only call if you need TaskOn conversion rate analysis
-    trackVisit('WalletAddress', address || undefined);
-  }, []); // Only run once on mount
+    if (address) {
+      trackVisit('WalletAddress', address);
+    } else {
+      // For anonymous users when no wallet connected
+      trackVisit();
+    }
+  }, [address]); // Re-run when address changes
 
   useEffect(() => {
     const savedLoginState = localStorage.getItem('taskon_evm_login_state');
@@ -89,16 +94,30 @@ export default function EvmClient() {
 
     try {
       console.log('Logging in with EVM wallet:', address);
-      const clientId = process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!;
-      const { signature, timestamp } = await signMessage(clientId, 'WalletAddress', address);
-        
-      await embedRef.current.login({
-        type: 'WalletAddress',
-        account: address,
-        signature: signature,
-        timestamp: timestamp,
-        provider: walletClient,
-      });
+      
+      // Check if account has valid authorization cache
+      const isAuthorized = await embedRef.current.isAuthorized('WalletAddress', address);
+      
+      if (isAuthorized) {
+        // Has valid auth cache, no signature needed
+        await embedRef.current.login({
+          type: 'WalletAddress',
+          account: address,
+          provider: walletClient,
+        });
+      } else {
+        // No auth cache, get signature first then login
+        const clientId = process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!;
+        const { signature, timestamp } = await signMessage(clientId, 'WalletAddress', address);
+          
+        await embedRef.current.login({
+          type: 'WalletAddress',
+          account: address,
+          signature: signature,
+          timestamp: timestamp,
+          provider: walletClient,
+        });
+      }
       
       setIsEvmLoggedIn(true);
       localStorage.setItem('taskon_evm_login_state', 'true');
@@ -112,8 +131,8 @@ export default function EvmClient() {
   const logout = useCallback(() => {
     if (!embedRef.current) return;
     
-    // Logout from TaskOn first, then disconnect wallet
-    embedRef.current.logout();
+    // Logout from TaskOn first (keep auth cache by default), then disconnect wallet
+    embedRef.current.logout(); // Default: { clearAuth: false }
     setIsEvmLoggedIn(false);
     localStorage.removeItem('taskon_evm_login_state');
     disconnect();
@@ -126,7 +145,7 @@ export default function EvmClient() {
       setIsEvmLoggedIn(false);
       localStorage.removeItem('taskon_evm_login_state');
       if (embedRef.current) {
-        embedRef.current.logout();
+        embedRef.current.logout(); // Keep auth cache for potential reconnection
       }
     }
   }, [isConnected, isEvmLoggedIn]);

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { TaskOnEmbed, trackVisit } from '@taskon/embed';
+import { TaskOnEmbed } from '@taskon/embed';
 
 interface EmailClientProps {
   currentEmail: string;
@@ -14,11 +14,6 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
   
   const [isEmbedInitialized, setIsEmbedInitialized] = useState(false);
 
-  // Track page visit on component mount (for conversion analytics)
-  useEffect(() => {
-    // Only call if you need TaskOn conversion rate analysis
-    trackVisit('Email', currentEmail || undefined);
-  }, []); // Only run once on mount
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -57,17 +52,17 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
     }
 
     try {
-      // Check if already logged in
-      const isLoggedIn = await embedRef.current.getIsLoggedIn('Email', email);
+      // Check if account has valid authorization cache
+      const isAuthorized = await embedRef.current.isAuthorized('Email', email);
       
-      if (isLoggedIn) {
-        // Already logged in, just call login without signature
+      if (isAuthorized) {
+        // Has valid auth cache, no signature needed
         await embedRef.current.login({
           type: 'Email',
           account: email,
         });
       } else {
-        // Not logged in, get signature first then login
+        // No auth cache, get signature first then login
         const { signature, timestamp } = await onSignature(email);
         
         await embedRef.current.login({
@@ -89,6 +84,7 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
     if (!embedRef.current || !embedRef.current.initialized) return;
     
     try {
+      // Default behavior: keep auth cache for quick re-login
       await embedRef.current.logout();
       console.log('TaskOn logout successful');
     } catch (error) {

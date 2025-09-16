@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import EmailClient from './email-client';
 import EmailModal from '../../components/EmailModal';
 import { signMessage } from '../../utils';
+import { trackVisit } from '@taskon/embed';
 
 export default function EmailPage() {
   const [currentEmail, setCurrentEmail] = useState<string>('');
@@ -18,6 +19,17 @@ export default function EmailPage() {
       setCurrentEmail(savedEmail);
     }
   }, []);
+
+  // Track page visit when email is available
+  useEffect(() => {
+    // Only call if you need TaskOn conversion rate analysis
+    if (currentEmail) {
+      trackVisit('Email', currentEmail);
+    } else {
+      // For anonymous users
+      trackVisit();
+    }
+  }, [currentEmail]); // Re-run when email changes
 
   // Demo login function
   const handleLogin = useCallback(async (email: string) => {
