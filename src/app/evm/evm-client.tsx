@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
-import { TaskOnEmbed, AuthType, trackVisit } from '@taskon/embed';
+import { TaskOnEmbed, AuthType, trackVisit, TaskCompletedData } from '@taskon/embed';
 import { signMessage } from '../../utils';
 
 export default function EvmClient() {
@@ -62,8 +62,13 @@ export default function EvmClient() {
       // Example: window.history.replaceState(null, '', `/evm${fullPath}`);
     };
 
+    const handleTaskCompleted = (data: TaskCompletedData) => {
+      console.log('TaskOn task completed:', data);
+    };
+
     embed.on('loginRequired', handleLoginRequired);
     embed.on('routeChanged', handleRouteChanged);
+    embed.on('taskCompleted', handleTaskCompleted);
 
     // Initialize the embed
     embed.init().then(() => {

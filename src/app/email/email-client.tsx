@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { TaskOnEmbed } from '@taskon/embed';
+import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
 
 interface EmailClientProps {
   currentEmail: string;
@@ -28,8 +28,13 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
       // You can synchronize and update the parent page's URL or state here
       // Example: window.history.replaceState(null, '', `/email${fullPath}`);
     };
+
+    const handleTaskCompleted = (data: TaskCompletedData) => {
+      console.log('TaskOn task completed:', data);
+    };
     
     embed.on('routeChanged', handleRouteChanged);
+    embed.on('taskCompleted', handleTaskCompleted);
     
     embed.init().then(() => {
       embedRef.current = embed;
