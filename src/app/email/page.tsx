@@ -1,11 +1,9 @@
 'use client'
 
-import type { Metadata } from 'next';
 import { useState, useEffect, useCallback } from 'react';
 import EmailClient from './email-client';
 import EmailModal from '../../components/EmailModal';
 import { signMessage } from '../../utils';
-import { trackVisit } from '@taskon/embed';
 
 export default function EmailPage() {
   const [currentEmail, setCurrentEmail] = useState<string>('');
@@ -20,21 +18,14 @@ export default function EmailPage() {
     }
   }, []);
 
-  // Track page visit when email is available
-  useEffect(() => {
-    // Only call if you need TaskOn conversion rate analysis
-    if (currentEmail) {
-      trackVisit('Email', currentEmail);
-    } else {
-      // For anonymous users
-      trackVisit();
-    }
-  }, [currentEmail]); // Re-run when email changes
 
   // Demo login function
   const handleLogin = useCallback(async (email: string) => {
     setIsLoggingIn(true);
     try {
+      // Ensure email and evm login are mutually exclusive - clear wallet address when logging in with email
+      localStorage.removeItem('demo_wallet_address');
+      
       // Simulate demo login logic here
       setCurrentEmail(email);
       setIsModalOpen(false);
@@ -49,11 +40,11 @@ export default function EmailPage() {
   }, []);
 
   // Demo logout function
-  const handleLogout = useCallback(() => {
+  const handleLogout = () => {
     setCurrentEmail('');
     localStorage.removeItem('demo_current_email');
     console.log('Demo logout successful');
-  }, []);
+  };
 
   // Signature generation function to pass to EmailClient, you should never sign message on client on production
   const generateSignature = useCallback(async (email: string) => {
@@ -62,15 +53,15 @@ export default function EmailPage() {
     return { signature, timestamp };
   }, []);
 
-  const handleOpenModal = useCallback(() => {
+  const handleOpenModal = () => {
     setIsModalOpen(true);
-  }, []);
+  };
 
-  const handleCloseModal = useCallback(() => {
+  const handleCloseModal = () => {
     if (!isLoggingIn) {
       setIsModalOpen(false);
     }
-  }, [isLoggingIn]);
+  };
 
   return (
     <div className="fixed inset-0 z-[1000]">

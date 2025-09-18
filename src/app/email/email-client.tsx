@@ -85,7 +85,7 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
   }, [onSignature]);
 
   // TaskOn logout function
-  const logoutFromTaskOn = useCallback(async () => {
+  const logoutFromTaskOn = async () => {
     if (!embedRef.current || !embedRef.current.initialized) return;
     
     try {
@@ -95,7 +95,7 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
     } catch (error) {
       console.warn('TaskOn logout failed (may not be logged in):', error);
     }
-  }, []);
+  };
 
   // Auto login/logout based on email changes
   useEffect(() => {

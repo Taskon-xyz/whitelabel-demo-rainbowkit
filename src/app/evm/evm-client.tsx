@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
-import { TaskOnEmbed, AuthType, trackVisit, TaskCompletedData } from '@taskon/embed';
+import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
 import { signMessage } from '../../utils';
 
 export default function EvmClient() {
@@ -18,16 +18,15 @@ export default function EvmClient() {
   const { openConnectModal } = useConnectModal();
   const { data: walletClient } = useWalletClient();
 
-  // Track page visit when address is available
+  // Simplified logic: save address directly to localStorage
   useEffect(() => {
-    // Only call if you need TaskOn conversion rate analysis
     if (address) {
-      trackVisit('WalletAddress', address);
+      localStorage.setItem('demo_wallet_address', address);
     } else {
-      // For anonymous users when no wallet connected
-      trackVisit();
+      localStorage.removeItem('demo_wallet_address');
     }
-  }, [address]); // Re-run when address changes
+  }, [address]);
+
 
   useEffect(() => {
     const savedLoginState = localStorage.getItem('taskon_evm_login_state');
@@ -124,6 +123,9 @@ export default function EvmClient() {
         });
       }
       
+      // Ensure email and evm login are mutually exclusive - clear email state when logging in with evm
+      localStorage.removeItem('demo_current_email');
+      
       setIsEvmLoggedIn(true);
       localStorage.setItem('taskon_evm_login_state', 'true');
       console.log('EVM login successful');
@@ -133,7 +135,7 @@ export default function EvmClient() {
     }
   }, [isConnected, address, walletClient]);
 
-  const logout = useCallback(() => {
+  const logout = () => {
     if (!embedRef.current) return;
     
     // Logout from TaskOn first (keep auth cache by default), then disconnect wallet
@@ -141,7 +143,7 @@ export default function EvmClient() {
     setIsEvmLoggedIn(false);
     localStorage.removeItem('taskon_evm_login_state');
     disconnect();
-  }, [disconnect]);
+  };
 
   // Handle automatic logout when wallet disconnects externally (e.g., from wallet extension)
   useEffect(() => {
