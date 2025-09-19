@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
 
 interface EmailClientProps {
@@ -8,7 +8,11 @@ interface EmailClientProps {
   onSignature: (email: string) => Promise<{ signature: string; timestamp: number }>;
 }
 
-export default function EmailClient({ currentEmail, onSignature }: EmailClientProps) {
+export interface EmailClientRef {
+  setLanguage: (language: string) => Promise<void>;
+}
+
+const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail, onSignature }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const embedRef = useRef<TaskOnEmbed | null>(null);
   
@@ -20,7 +24,8 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
 
     const embed = new TaskOnEmbed({
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
-      containerElement: containerRef.current
+      containerElement: containerRef.current,
+      language: 'en' // Use default language for initialization
     });
 
     const handleRouteChanged = (fullPath: string) => {
@@ -46,7 +51,7 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
       embedRef.current = null;
       setIsEmbedInitialized(false);
     };
-  }, []);
+  }, []); // Only initialize once
 
 
   // TaskOn login function
@@ -97,6 +102,21 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
     }
   };
 
+  // Add method to set language dynamically
+  const setLanguage = useCallback(async (newLanguage: string) => {
+    if (!embedRef.current || !isEmbedInitialized) {
+      console.log('Embed not ready, language will be applied when available');
+      return;
+    }
+
+    try {
+      await embedRef.current.setLanguage(newLanguage);
+      console.log('Language changed to:', newLanguage);
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    }
+  }, [isEmbedInitialized]);
+
   // Auto login/logout based on email changes
   useEffect(() => {
     if (!isEmbedInitialized || !embedRef.current) return;
@@ -114,8 +134,16 @@ export default function EmailClient({ currentEmail, onSignature }: EmailClientPr
     handleEmailChange();
   }, [currentEmail, isEmbedInitialized, loginToTaskOn, logoutFromTaskOn]);
 
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    setLanguage
+  }), [setLanguage]);
 
   return (
     <div ref={containerRef} className="w-full h-full" />
   );
-}
+});
+
+EmailClient.displayName = 'EmailClient';
+
+export default EmailClient;
