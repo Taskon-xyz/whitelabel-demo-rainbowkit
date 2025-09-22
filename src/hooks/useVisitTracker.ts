@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { trackVisit } from '@taskon/embed';
 
 export function useVisitTracker() {
@@ -10,15 +9,15 @@ export function useVisitTracker() {
     
     if (currentEmail) {
       // for email
-      trackVisit('Email', currentEmail);
+      trackVisit('Email', currentEmail, true);
     } 
     else if (currentWalletAddress) {
       // for evm
-      trackVisit('WalletAddress', currentWalletAddress);
+      trackVisit('WalletAddress', currentWalletAddress, true);
     }
     // Anonymous user
     else {
-      trackVisit();
+      trackVisit(undefined, undefined, true);
     }
   }, []);
 }

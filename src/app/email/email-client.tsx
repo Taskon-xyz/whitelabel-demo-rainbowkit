@@ -25,7 +25,8 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail
     const embed = new TaskOnEmbed({
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
       containerElement: containerRef.current,
-      language: 'en' // Use default language for initialization
+      language: 'en', // Use default language for initialization
+      isDev: true
     });
 
     const handleRouteChanged = (fullPath: string) => {

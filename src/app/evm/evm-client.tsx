@@ -48,8 +48,8 @@ export default function EvmClient() {
     const embed = new TaskOnEmbed({
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
       containerElement: containerRef.current,
-      oauthToolUrl: 'https://stage.generalauthservice.com',
-      language: 'en' // Use default language for initialization
+      language: 'en', // Use default language for initialization
+      isDev: true
     });
 
     const handleLoginRequired = () => {
