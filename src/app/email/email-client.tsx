@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
-import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
+import { TaskOnEmbed, TaskCompletedData, BindConflictData } from '@taskon/embed';
 
 interface EmailClientProps {
   currentEmail: string;
@@ -15,7 +15,7 @@ export interface EmailClientRef {
 const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail, onSignature }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const embedRef = useRef<TaskOnEmbed | null>(null);
-  
+
   const [isEmbedInitialized, setIsEmbedInitialized] = useState(false);
 
 
@@ -38,9 +38,14 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail
     const handleTaskCompleted = (data: TaskCompletedData) => {
       console.log('TaskOn task completed:', data);
     };
-    
+
+    const handleBindConflict = (data: BindConflictData) => {
+      console.log('TaskOn bind conflict:', data);
+    };
+
     embed.on('routeChanged', handleRouteChanged);
     embed.on('taskCompleted', handleTaskCompleted);
+    embed.on('bindConflict', handleBindConflict);
     
     embed.init().then(() => {
       embedRef.current = embed;
