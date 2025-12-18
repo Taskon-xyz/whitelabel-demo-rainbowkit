@@ -141,7 +141,7 @@ export default function EvmClient() {
     if (!embedRef.current) return;
     
     // Logout from TaskOn first (keep auth cache by default), then disconnect wallet
-    embedRef.current.logout(); // Default: { clearAuth: false }
+    embedRef.current.logout({ clearAuth: true }); // Default: { clearAuth: false }
     setIsEvmLoggedIn(false);
     localStorage.removeItem('taskon_evm_login_state');
     disconnect();
@@ -154,7 +154,7 @@ export default function EvmClient() {
       setIsEvmLoggedIn(false);
       localStorage.removeItem('taskon_evm_login_state');
       if (embedRef.current) {
-        embedRef.current.logout(); // Keep auth cache for potential reconnection
+        embedRef.current.logout({ clearAuth: true }); // Keep auth cache for potential reconnection
       }
     }
   }, [isConnected, isEvmLoggedIn]);
