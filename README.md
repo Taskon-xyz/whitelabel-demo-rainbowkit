@@ -17,20 +17,9 @@ pnpm install
 
 ### Configure Environment Variables
 
-1. **For local development** (connecting to localhost:5173):
-   ```bash
-   # Copy the example file
-   cp .env.local.example .env.local
-   
-   # .env.local will contain:
-   # NEXT_PUBLIC_TASKON_BASE_URL=http://localhost:5173
-   ```
-
-2. **For production** (connecting to https://whitelabel.wode.tech):
-   - The `.env` file is already configured with production URLs
-   - No action needed unless you want to override
-
-> **Note**: `.env.local` takes precedence over `.env` when both exist
+- **Testnet / development**: `.env.test` (default values included). The default `pnpm dev` and `pnpm run build:test` commands load this file automatically.
+- **Production**: `.env.production` (default values included). `pnpm run build:prod` and `pnpm run export:prod` load this file.
+- **Overrides**: Copy either file to `.env.local` if you need local-only tweaks; `.env.local` takes precedence over the base files.
 
 ### Configure WalletConnect
 
@@ -50,7 +39,8 @@ export const config = getDefaultConfig({
 ### Start Development Server
 
 ```bash
-npm run dev
+pnpm dev           # uses .env.test by default
+# pnpm run dev:prod # optional: run dev server against production env vars
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the result.
@@ -103,13 +93,16 @@ When setting up OAuth applications for your white-label deployment, configure th
 # Install dependencies
 pnpm install
 
-# Build for production
-npm run build
+# Testnet build (uses .env.test)
+pnpm run build:test
+
+# Production build (uses .env.production)
+pnpm run build:prod
 
 # Output: Static files will be generated in the 'out' directory
 ```
 
-The project is configured for full static export. After running `npm run build`, deploy the `out` directory to your server.
+The project is configured for full static export. After running one of the build commands, deploy the `out` directory to your server. If you prefer to run the explicit export step, use `pnpm run export:test` or `pnpm run export:prod`.
 
 ## Environment Variables
 
@@ -126,26 +119,30 @@ NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable test networks
 
 ### Environment Files Priority:
 1. `.env.local` - Local overrides (git ignored)
-2. `.env` - Default production values (committed to git)
+2. `.env.test` or `.env.production` - Loaded automatically by the scripts based on the command you run
+3. `.env` - Placeholder for documentation only
 
 ## Project Structure
 
 ```
 whitelabel-demo-rainbowkit/
 ├── src/
+│   ├── app/
+│   │   ├── email/
+│   │   ├── evm/
+│   │   ├── layout.tsx
+│   │   └── page.tsx
 │   ├── components/
-│   │   └── EmailModal.tsx  # Email login modal component
-│   ├── pages/
-│   │   ├── _app.tsx        # App entry, RainbowKit configuration
-│   │   ├── index.tsx       # Landing page
-│   │   ├── evm.tsx         # EVM wallet demo page
-│   │   └── email.tsx       # Email login demo page
-│   ├── styles/             # Global styles
+│   ├── hooks/
+│   ├── styles/
 │   ├── utils.ts            # Utility functions (signature generation)
 │   └── wagmi.ts            # Wagmi configuration
+├── scripts/
+│   └── with-env.js         # Helper to inject env files into Next.js commands
 ├── out/                    # Build output directory (generated after build)
-├── .env                    # Production environment variables
-├── .env.local.example      # Local development environment template
+├── .env                    # Placeholder pointing to environment-specific files
+├── .env.test               # Testnet/dev environment variables
+├── .env.production         # Production environment variables
 ├── next.config.js          # Next.js configuration
 └── package.json            # Project dependencies
 ```

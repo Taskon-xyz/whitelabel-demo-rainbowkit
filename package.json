@@ -3,10 +3,18 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "export": "next build",
-    "start": "next start"
+    "dev": "node scripts/with-env.js .env.test dev",
+    "dev:test": "node scripts/with-env.js .env.test dev",
+    "dev:prod": "node scripts/with-env.js .env.production dev",
+    "build": "node scripts/with-env.js .env.production build",
+    "build:prod": "node scripts/with-env.js .env.production build",
+    "build:test": "node scripts/with-env.js .env.test build",
+    "export": "node scripts/with-env.js .env.production build",
+    "export:prod": "node scripts/with-env.js .env.production build",
+    "export:test": "node scripts/with-env.js .env.test build",
+    "start": "node scripts/with-env.js .env.production start",
+    "start:prod": "node scripts/with-env.js .env.production start",
+    "start:test": "node scripts/with-env.js .env.test start"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
