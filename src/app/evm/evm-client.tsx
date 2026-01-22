@@ -49,7 +49,8 @@ export default function EvmClient() {
       baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
       containerElement: containerRef.current,
       language: 'en', // Use default language for initialization
-      isDev: true
+      isDev: true,
+      tabsExclude: ['leaderboard']
     });
 
     const handleLoginRequired = () => {
