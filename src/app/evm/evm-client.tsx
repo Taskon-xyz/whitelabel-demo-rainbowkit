@@ -6,6 +6,8 @@ import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
 import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
 import { signMessage } from '../../utils';
 
+const EVM_ROUTE_BASE_PATH = '/evm';
+
 export default function EvmClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const embedRef = useRef<TaskOnEmbed | null>(null);
@@ -53,6 +55,46 @@ export default function EvmClient() {
       tabsInclude: ["home", "quests", "leaderboard", "incentives", "benefit", "wheelOfFortune", "events", "milestone"]
     });
 
+    const buildParentPathFromIframeRoute = (fullPath: string) => {
+      // Build parent URL path from iframe route using path segments only.
+      // This keeps the parent URL shareable without relying on query parameters.
+      const normalizedRoute = fullPath.startsWith('/') ? fullPath : `/${fullPath}`;
+      const iframeUrl = new URL(normalizedRoute, window.location.origin);
+      const normalizedPath = `${EVM_ROUTE_BASE_PATH}${iframeUrl.pathname}`.replace(/\/{2,}/g, '/');
+      return `${normalizedPath}${iframeUrl.search}${iframeUrl.hash}`;
+    };
+
+    const resolveIframeRouteFromLocation = () => {
+      // Extract iframe route from parent path so we can restore deep links.
+      if (typeof window === 'undefined') {
+        return '/';
+      }
+
+      const { pathname, search, hash } = window.location;
+      if (!pathname.startsWith(EVM_ROUTE_BASE_PATH)) {
+        return '/';
+      }
+
+      const trimmedPath = pathname.slice(EVM_ROUTE_BASE_PATH.length);
+      if (!trimmedPath || trimmedPath === '/') {
+        return '/';
+      }
+
+      return `${trimmedPath}${search}${hash}`;
+    };
+
+    const handlePopState = () => {
+      // Sync iframe route when the user navigates browser history.
+      if (!embed.initialized) {
+        return;
+      }
+
+      const nextRoute = resolveIframeRouteFromLocation();
+      embed.setRoute(nextRoute).catch((error) => {
+        console.error('Failed to sync iframe route from browser history:', error);
+      });
+    };
+
     const handleLoginRequired = () => {
       console.log('TaskOn loginRequired event triggered');
       openConnectModal?.();
@@ -60,8 +102,13 @@ export default function EvmClient() {
     
     const handleRouteChanged = (fullPath: string) => {
       console.log('TaskOn route changed:', fullPath);
-      // You can synchronize and update the parent page's URL or state here
-      // Example: window.history.replaceState(null, '', `/evm${fullPath}`);
+      // Sync iframe route to the parent URL path so it can be shared and restored.
+      const nextPath = buildParentPathFromIframeRoute(fullPath);
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (currentPath === nextPath) {
+        return;
+      }
+      window.history.replaceState(null, '', nextPath);
     };
 
     const handleTaskCompleted = (data: TaskCompletedData) => {
@@ -73,15 +120,26 @@ export default function EvmClient() {
     embed.on('taskCompleted', handleTaskCompleted);
 
     // Initialize the embed
-    embed.init().then(() => {
+    embed.init().then(async () => {
       console.log('TaskOn embed initialized successfully');
       embedRef.current = embed;
       setIsEmbedInitialized(true);
+
+      // Restore iframe route from the parent URL so deep links open correctly.
+      const initialRoute = resolveIframeRouteFromLocation();
+      try {
+        await embed.setRoute(initialRoute);
+      } catch (error) {
+        console.error('Failed to restore iframe route from URL:', error);
+      }
+
+      window.addEventListener('popstate', handlePopState);
     }).catch((error) => {
       console.error('TaskOn embed initialization failed:', error);
     });
 
     return () => {
+      window.removeEventListener('popstate', handlePopState);
       console.log('Cleaning up TaskOn embed...');
       embed.destroy();
       embedRef.current = null;
