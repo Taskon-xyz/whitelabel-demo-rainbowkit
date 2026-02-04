@@ -50,7 +50,7 @@ export default function EvmClient() {
       containerElement: containerRef.current,
       language: 'en', // Use default language for initialization
       isDev: true,
-      tabsExclude: ['leaderboard']
+      tabsInclude: ["home", "quests", "leaderboard", "incentives", "benefit", "wheelOfFortune", "events", "milestone"]
     });
 
     const handleLoginRequired = () => {
