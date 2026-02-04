@@ -1,6 +1,6 @@
 # TaskOn White-label Wallet Connection Demo
 
-A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with server-side deployment support for deep links.
+A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + React + Vite. The app runs as a client-side SPA, and the parent URL is synced with the embedded TaskOn route so deep links can be shared.
 
 ## Demo URLs
 - Production Demo: https://whitelabel-demo-rainbowkit.taskon.xyz/
@@ -17,13 +17,13 @@ pnpm install
 
 ### Configure Environment Variables
 
-1. **For local development** (connecting to localhost:5173):
+1. **For local development** (connecting to a local embed or custom host):
    ```bash
    # Copy the example file
    cp .env.local.example .env.local
    
    # .env.local will contain:
-   # NEXT_PUBLIC_TASKON_BASE_URL=http://localhost:5173
+   # VITE_TASKON_BASE_URL=http://localhost:5173
    ```
 
 2. **For production** (connecting to https://whitelabel.wode.tech):
@@ -39,21 +39,20 @@ pnpm install
 3. Replace `YOUR_PROJECT_ID` in `src/wagmi.ts`:
 
 ```typescript
-export const config = getDefaultConfig({
-  appName: 'TaskOn Wallet Demo',
-  projectId: 'your-actual-project-id', // Replace this
-  chains: [/*...*/],
-  ssr: true,
-});
+const projectId = 'your-actual-project-id';
 ```
 
 ### Start Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the result.
+Open [http://localhost:5173](http://localhost:5173) to see the result.
+
+## Routing & Deep Links
+
+This demo uses `BrowserRouter` and syncs the TaskOn iframe route into the parent URL using path segments (no query params). If you deploy to a static host, make sure unknown routes fall back to `index.html` so `/email`, `/evm`, and nested TaskOn paths load correctly.
 
 ## OAuth Configuration
 
@@ -95,7 +94,7 @@ When setting up OAuth applications for your white-label deployment, configure th
 4. Provider redirects to `https://generalauthservice.com/callback/{provider}`
 5. Auth service redirects back to your white-label site with credentials
 
-## Build and Deployment
+## Build and Preview
 
 ### Build Commands
 
@@ -106,13 +105,11 @@ pnpm install
 # Build for production
 pnpm build
 
-# Start production server
-pnpm start
-
-# Output: Next.js server build will be generated in the '.next' directory
+# Preview the build locally
+pnpm preview
 ```
 
-The project runs with the Next.js server output. After running `pnpm build`, start it with `pnpm start`.
+The production build output is generated in the `dist` directory.
 
 ## Environment Variables
 
@@ -120,11 +117,12 @@ The project runs with the Next.js server output. After running `pnpm build`, sta
 
 ```bash
 # TaskOn SDK Configuration
-NEXT_PUBLIC_TASKON_BASE_URL  # TaskOn iframe URL (default: https://whitelabel.wode.tech)
-NEXT_PUBLIC_TASKON_CLIENT_ID # Client ID for authentication
+VITE_TASKON_BASE_URL  # TaskOn iframe URL (default: https://whitelabel.wode.tech)
+VITE_TASKON_CLIENT_ID # Client ID for authentication
+VITE_TASKON_PRIVATE_KEY # RSA private key for signing demo logins
 
 # Test Networks
-NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable test networks
+VITE_ENABLE_TESTNETS=true  # Enable test networks
 ```
 
 ### Environment Files Priority:
@@ -135,27 +133,36 @@ NEXT_PUBLIC_ENABLE_TESTNETS=true  # Enable test networks
 
 ```
 whitelabel-demo-rainbowkit/
+├── index.html
 ├── src/
 │   ├── components/
-│   │   └── EmailModal.tsx  # Email login modal component
+│   │   ├── EmailClient.tsx     # TaskOn embed wrapper for email demo
+│   │   ├── EmailModal.tsx      # Email login modal component
+│   │   └── VisitTracker.tsx    # Track visits for analytics
+│   ├── evm/
+│   │   ├── evm-client.tsx      # TaskOn embed wrapper for EVM demo
+│   │   └── evm-providers.tsx   # wagmi + RainbowKit providers
+│   ├── hooks/
+│   │   └── useVisitTracker.ts  # Shared visit tracking hook
 │   ├── pages/
-│   │   ├── _app.tsx        # App entry, RainbowKit configuration
-│   │   ├── index.tsx       # Landing page
-│   │   ├── evm.tsx         # EVM wallet demo page
-│   │   └── email.tsx       # Email login demo page
-│   ├── styles/             # Global styles
-│   ├── utils.ts            # Utility functions (signature generation)
-│   └── wagmi.ts            # Wagmi configuration
-├── .next/                  # Next.js server build output
+│   │   ├── HomePage.tsx        # Landing page
+│   │   ├── EmailPage.tsx       # Email demo page
+│   │   └── EvmPage.tsx         # EVM demo page
+│   ├── styles/                 # Global styles
+│   ├── App.tsx                 # SPA routes
+│   ├── main.tsx                # Vite entry
+│   ├── utils.ts                # Signature helpers
+│   └── wagmi.ts                # Wagmi configuration
+├── dist/                       # Vite build output
 ├── .env                    # Production environment variables
 ├── .env.local.example      # Local development environment template
-├── next.config.js          # Next.js configuration
-└── package.json            # Project dependencies
+├── tailwind.config.js
+└── vite.config.ts
 ```
 
 ## Tech Stack
 
-- **Framework**: Next.js 15
+- **Framework**: React 19 + Vite 6
 - **Wallet Connection**: RainbowKit 2.2+
 - **Ethereum Interaction**: wagmi 2.15+
 - **Query Management**: TanStack Query 5.55+
@@ -173,4 +180,5 @@ whitelabel-demo-rainbowkit/
 
 - [RainbowKit Documentation](https://rainbowkit.com) - Learn how to customize your wallet connection flow
 - [wagmi Documentation](https://wagmi.sh) - Learn how to interact with Ethereum
-- [Next.js Documentation](https://nextjs.org/docs) - Learn how to build Next.js applications
+- [Vite Documentation](https://vitejs.dev/) - Learn how to build React + Vite applications
+- [React Router Documentation](https://reactrouter.com/) - Learn how to handle client-side routing

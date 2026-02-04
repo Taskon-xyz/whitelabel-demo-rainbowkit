@@ -1,4 +1,6 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+// Build the wagmi config lazily so server-side builds don't execute
+// wallet SDK code that expects browser APIs (e.g., indexedDB).
 import {
   arbitrum,
   base,
@@ -8,16 +10,17 @@ import {
   sepolia,
 } from 'wagmi/chains';
 
-export const config = getDefaultConfig({
-  appName: 'RainbowKit App',
-  projectId: 'YOUR_PROJECT_ID',
-  chains: [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
-  ],
-  ssr: true,
-});
+export const createWagmiConfig = () =>
+  getDefaultConfig({
+    appName: 'RainbowKit App',
+    projectId: 'YOUR_PROJECT_ID',
+    chains: [
+      mainnet,
+      polygon,
+      optimism,
+      arbitrum,
+      base,
+      ...(import.meta.env.VITE_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
+    ],
+    ssr: true,
+  });

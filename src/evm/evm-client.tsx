@@ -1,10 +1,9 @@
-'use client'
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit';
 import { TaskOnEmbed, TaskCompletedData } from '@taskon/embed';
-import { signMessage } from '../../utils';
+// Utils live at src/utils.ts in the Vite SPA layout.
+import { signMessage } from '../utils';
 
 const EVM_ROUTE_BASE_PATH = '/evm';
 
@@ -48,7 +47,7 @@ export default function EvmClient() {
     console.log('Initializing TaskOn embed...');
     
     const embed = new TaskOnEmbed({
-      baseUrl: process.env.NEXT_PUBLIC_TASKON_BASE_URL!,
+      baseUrl: import.meta.env.VITE_TASKON_BASE_URL as string,
       containerElement: containerRef.current,
       language: 'en', // Use default language for initialization
       isDev: true,
@@ -173,7 +172,7 @@ export default function EvmClient() {
         });
       } else {
         // No auth cache, get signature first then login
-        const clientId = process.env.NEXT_PUBLIC_TASKON_CLIENT_ID!;
+        const clientId = import.meta.env.VITE_TASKON_CLIENT_ID as string;
         const { signature, timestamp } = await signMessage(clientId, 'evm', address);
           
         await embedRef.current.login({
@@ -265,21 +264,21 @@ export default function EvmClient() {
   return (
     <div className="fixed inset-0 z-[1000]">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-black/45 backdrop-blur-xl border-b border-white/10 flex items-center px-5 z-[1001]">
+      <header className="fixed top-0 left-0 right-0 bg-black/45 backdrop-blur-xl border-b border-white/10 flex flex-wrap items-center gap-2 sm:gap-4 px-4 sm:px-5 py-2 sm:py-0 h-auto sm:h-16 z-[1001]">
         {/* Left - Branding */}
-        <div className="flex items-center gap-4 flex-1">
-          <h1 className="m-0 text-xl text-white font-bold tracking-wide">
+        <div className="flex items-center gap-3 flex-1 min-w-[120px] order-1 sm:order-none">
+          <h1 className="m-0 text-base sm:text-xl text-white font-bold tracking-wide whitespace-nowrap">
             EVM Wallet Demo
           </h1>
         </div>
 
         {/* Center - Language Selector */}
-        <div className="flex items-center justify-center flex-1">
-          <div className="relative">
+        <div className="flex items-center justify-center w-full order-3 sm:order-none sm:flex-1 sm:w-auto">
+          <div className="relative w-full sm:w-auto max-w-[240px]">
             <select
               value={currentLanguage}
               onChange={(e) => changeLanguage(e.target.value)}
-              className="bg-black/50 backdrop-blur-md border border-white/20 rounded-md px-3 py-2 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none pr-8 cursor-pointer hover:bg-black/70 transition-all duration-200"
+              className="w-full bg-black/50 backdrop-blur-md border border-white/20 rounded-md px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none pr-8 cursor-pointer hover:bg-black/70 transition-all duration-200"
             >
               {languages.map((lang) => (
                 <option key={lang.code} value={lang.code} className="bg-gray-800 text-white">
@@ -296,15 +295,15 @@ export default function EvmClient() {
         </div>
 
         {/* Right - Wallet Connection */}
-        <div className="flex items-center gap-3 flex-1 justify-end">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-[120px] justify-end order-2 sm:order-none">
           {isConnected ? (
             <div className="flex items-center gap-2">
-              <div className="text-sm text-green-400 font-mono">
+              <div className="text-xs sm:text-sm text-green-400 font-mono max-w-[120px] truncate">
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </div>
               <button
                 onClick={logout}
-                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 backdrop-blur-md border bg-gray-500/90 hover:bg-gray-500 text-white border-gray-500 cursor-pointer hover:-translate-y-0.5"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 backdrop-blur-md border bg-gray-500/90 hover:bg-gray-500 text-white border-gray-500 cursor-pointer hover:-translate-y-0.5"
               >
                 Disconnect
               </button>

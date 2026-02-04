@@ -1,6 +1,6 @@
 
 // PKCS#1 private key in base64 format
-const TEST_PK_BASE64 = process.env.NEXT_PUBLIC_TASKON_PRIVATE_KEY!;
+const TEST_PK_BASE64 = import.meta.env.VITE_TASKON_PRIVATE_KEY as string;
 
 export const signMessage = async (clientId: string, type: 'Email' | 'evm', value: string): Promise<{
   signature: string;
@@ -9,11 +9,11 @@ export const signMessage = async (clientId: string, type: 'Email' | 'evm', value
   const timestamp = Date.now();
   const message = `${type}|${value}|${clientId}|${timestamp}`;
   console.log('sign source message', message);
-
-  // If running in Node or WebCrypto not available, fallback to Node signer
-  if (typeof window === 'undefined' || !(globalThis.crypto && (globalThis.crypto as Crypto).subtle)) {
-    return signMessageNode(clientId, type, value);
+  // This demo runs in the browser; require WebCrypto for signing.
+  if (!(globalThis.crypto && (globalThis.crypto as Crypto).subtle)) {
+    throw new Error('WebCrypto is not available in this environment');
   }
+
 
   // Browser: use WebCrypto SubtleCrypto with RSASSA-PKCS1-v1_5 and SHA-256
   const textEncoder = new TextEncoder();
@@ -43,29 +43,6 @@ export const signMessage = async (clientId: string, type: 'Email' | 'evm', value
   };
 }
 
-
-/**
- * Sign message with Node.js
- */
-export const signMessageNode = (clientId: string, type: 'Email' | 'evm', value: string): {
-  signature: string;
-  timestamp: number;
-} => {
-  const timestamp = Date.now();
-  const message = `${type}|${value}|${clientId}|${timestamp}`;
-    // Use dynamic require to avoid bundling Node 'crypto' into browser builds
-    const { sign } = require('crypto') as typeof import('crypto');
-    const privateKeyBuffer = Buffer.from(TEST_PK_BASE64, 'base64');
-    const signature = sign('RSA-SHA256', new TextEncoder().encode(message), {
-      key: privateKeyBuffer,
-      format: 'der',
-      type: 'pkcs1'
-    });
-    return {
-      signature: signature.toString('base64'),
-      timestamp: timestamp
-    };
-  }
 
 // ---------- Helpers (browser) ----------
 function base64ToUint8(base64: string): Uint8Array {
