@@ -145,7 +145,7 @@ export default function EvmClient() {
       embedRef.current = null;
       setIsEmbedInitialized(false);
     };
-  }, []); // Only initialize once
+  }, [openConnectModal]); // Only initialize once
 
   const loginWithWallet = useCallback(async () => {
     if (!embedRef.current || !isConnected || !address || !walletClient) {
@@ -225,7 +225,7 @@ export default function EvmClient() {
       console.log('Auto-login triggered: wallet connected and embed ready');
       loginWithWallet();
     }
-  }, [isConnected, isEmbedInitialized, address, walletClient]);
+  }, [isConnected, isEmbedInitialized, isEvmLoggedIn, address, walletClient, loginWithWallet]);
 
   // Language switching function
   const changeLanguage = useCallback(async (language: string) => {
@@ -250,7 +250,7 @@ export default function EvmClient() {
     if (isEmbedInitialized && embedRef.current && currentLanguage !== 'en') {
       changeLanguage(currentLanguage);
     }
-  }, [isEmbedInitialized, changeLanguage]);
+  }, [isEmbedInitialized, currentLanguage, changeLanguage]);
 
   // Language options
   const languages = [

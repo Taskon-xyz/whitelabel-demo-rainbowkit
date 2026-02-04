@@ -96,7 +96,8 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail
   }, [onSignature]);
 
   // TaskOn logout function
-  const logoutFromTaskOn = async () => {
+  const logoutFromTaskOn = useCallback(async () => {
+    // Keep a stable callback so effects do not re-run on every render.
     if (!embedRef.current || !embedRef.current.initialized) return;
     
     try {
@@ -106,7 +107,7 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(({ currentEmail
     } catch (error) {
       console.warn('TaskOn logout failed (may not be logged in):', error);
     }
-  };
+  }, []);
 
   // Add method to set language dynamically
   const setLanguage = useCallback(async (newLanguage: string) => {
