@@ -104,12 +104,12 @@ When setting up OAuth applications for your white-label deployment, configure th
 pnpm install
 
 # Build for production
-npm run build
+pnpm build
 
 # Output: Static files will be generated in the 'out' directory
 ```
 
-The project is configured for full static export. After running `npm run build`, deploy the `out` directory to your server.
+The project is configured for full static export. After running `pnpm build`, deploy the `out` directory to your server.
 
 ## Environment Variables
 

@@ -103,6 +103,8 @@ export default function EvmClient() {
     const handleRouteChanged = (fullPath: string) => {
       console.log('TaskOn route changed:', fullPath);
       // Sync iframe route to the parent URL path so it can be shared and restored.
+      // Integrators should map the path based on their own routing/hosting setup.
+      // For static export, only pre-generated paths will be accessible directly.
       const nextPath = buildParentPathFromIframeRoute(fullPath);
       const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       if (currentPath === nextPath) {
