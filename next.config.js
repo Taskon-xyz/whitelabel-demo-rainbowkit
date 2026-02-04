@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  // Server output keeps dynamic routes working for deep links.
+  // Static export would require pre-generated paths and hosting rewrites.
   trailingSlash: true,
   images: {
     unoptimized: true,

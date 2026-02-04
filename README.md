@@ -1,6 +1,6 @@
 # TaskOn White-label Wallet Connection Demo
 
-A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with static deployment support.
+A TaskOn white-label demo project built with [RainbowKit](https://rainbowkit.com) + [wagmi](https://wagmi.sh) + [Next.js](https://nextjs.org/) with server-side deployment support for deep links.
 
 ## Demo URLs
 - Production Demo: https://whitelabel-demo-rainbowkit.taskon.xyz/
@@ -106,10 +106,13 @@ pnpm install
 # Build for production
 pnpm build
 
-# Output: Static files will be generated in the 'out' directory
+# Start production server
+pnpm start
+
+# Output: Next.js server build will be generated in the '.next' directory
 ```
 
-The project is configured for full static export. After running `pnpm build`, deploy the `out` directory to your server.
+The project runs with the Next.js server output. After running `pnpm build`, start it with `pnpm start`.
 
 ## Environment Variables
 
@@ -143,7 +146,7 @@ whitelabel-demo-rainbowkit/
 │   ├── styles/             # Global styles
 │   ├── utils.ts            # Utility functions (signature generation)
 │   └── wagmi.ts            # Wagmi configuration
-├── out/                    # Build output directory (generated after build)
+├── .next/                  # Next.js server build output
 ├── .env                    # Production environment variables
 ├── .env.local.example      # Local development environment template
 ├── next.config.js          # Next.js configuration
