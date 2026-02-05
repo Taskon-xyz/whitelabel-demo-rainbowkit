@@ -79,7 +79,7 @@ export default function EvmClient() {
 
       const trimmedPath = pathname.slice(EVM_ROUTE_BASE_PATH.length);
       if (!trimmedPath || trimmedPath === '/') {
-        return '/';
+        return `/${search}${hash}`;
       }
 
       return `${trimmedPath}${search}${hash}`;
