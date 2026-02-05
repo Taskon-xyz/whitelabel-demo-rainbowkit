@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     // Always run the dev server on 5173 to match the embed's expected origin.
-    port: 5173,
+    port: 5175,
     strictPort: true,
   },
 });
