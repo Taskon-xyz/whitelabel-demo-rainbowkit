@@ -60,6 +60,9 @@ export default function EvmClient() {
       const normalizedRoute = fullPath.startsWith('/') ? fullPath : `/${fullPath}`;
       const iframeUrl = new URL(normalizedRoute, window.location.origin);
       const normalizedPath = `${EVM_ROUTE_BASE_PATH}${iframeUrl.pathname}`.replace(/\/{2,}/g, '/');
+      if (iframeUrl.pathname === '/') {
+        return `${EVM_ROUTE_BASE_PATH}${iframeUrl.search}${iframeUrl.hash}`;
+      }
       return `${normalizedPath}${iframeUrl.search}${iframeUrl.hash}`;
     };
 
