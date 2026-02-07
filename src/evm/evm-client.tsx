@@ -50,7 +50,6 @@ export default function EvmClient() {
       baseUrl: import.meta.env.VITE_TASKON_BASE_URL as string,
       containerElement: containerRef.current,
       language: 'en', // Use default language for initialization
-      isDev: true,
       tabsInclude: ["home", "quests", "leaderboard", "incentives", "benefit", "wheelOfFortune", "events", "milestone"]
     });
 

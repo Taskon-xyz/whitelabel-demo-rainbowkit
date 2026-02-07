@@ -31,7 +31,6 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
         baseUrl: import.meta.env.VITE_TASKON_BASE_URL as string,
         containerElement: containerRef.current,
         language: 'en',
-        isDev: true,
       });
 
       const handleRouteChanged = (fullPath: string) => {
