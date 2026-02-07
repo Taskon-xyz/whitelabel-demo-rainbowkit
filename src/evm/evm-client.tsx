@@ -276,7 +276,7 @@ export default function EvmClient() {
         </div>
 
         {/* Center - Language Selector */}
-        <div className="flex items-center justify-center w-full order-3 sm:order-none sm:flex-1 sm:w-auto">
+        <div className="hidden sm:flex items-center justify-center w-full order-3 sm:order-none sm:flex-1 sm:w-auto">
           <div className="relative w-full sm:w-auto max-w-[240px]">
             <select
               value={currentLanguage}
