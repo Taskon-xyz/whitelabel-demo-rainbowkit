@@ -13,21 +13,21 @@ export default function EmailPage() {
   useEffect(() => {
     const savedEmail = localStorage.getItem('demo_current_email');
     if (savedEmail) {
+      console.log('[Demo][Email] Restored existing demo session from storage:', savedEmail);
       setCurrentEmail(savedEmail);
     }
   }, []);
 
   const handleLogin = useCallback(async (email: string) => {
+    console.log('[Demo][Email] Login flow started:', email);
     setIsLoggingIn(true);
     try {
-      localStorage.removeItem('demo_wallet_address');
-
       setCurrentEmail(email);
       setIsModalOpen(false);
       localStorage.setItem('demo_current_email', email);
-      console.log('Demo login successful:', email);
+      console.log('[Demo][Email] Login successful, TaskOn login will be triggered by session effect:', email);
     } catch (error) {
-      console.error('Demo login failed:', error);
+      console.error('[Demo][Email] Login failed:', error);
       alert('Demo login failed. Please try again.');
     } finally {
       setIsLoggingIn(false);
@@ -35,9 +35,10 @@ export default function EmailPage() {
   }, []);
 
   const handleLogout = () => {
+    console.log('[Demo][Email] Logout flow started');
     setCurrentEmail('');
     localStorage.removeItem('demo_current_email');
-    console.log('Demo logout successful');
+    console.log('[Demo][Email] Logout successful, TaskOn logout will be triggered by session effect');
   };
 
   const generateSignature = useCallback(async (email: string) => {
@@ -47,6 +48,7 @@ export default function EmailPage() {
   }, []);
 
   const handleOpenModal = () => {
+    console.log('[Demo][Email] Opening host login modal');
     setIsModalOpen(true);
   };
 
@@ -141,7 +143,12 @@ export default function EmailPage() {
 
       {/* TaskOn Email Client */}
       <main className="absolute inset-0 bg-gray-50">
-        <EmailClient ref={emailClientRef} currentEmail={currentEmail} onSignature={generateSignature} />
+        <EmailClient
+          ref={emailClientRef}
+          currentEmail={currentEmail}
+          onSignature={generateSignature}
+          onRequireDemoLogin={handleOpenModal}
+        />
       </main>
 
       {/* Demo Email Modal */}

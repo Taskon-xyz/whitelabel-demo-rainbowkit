@@ -2,7 +2,7 @@
 // PKCS#1 private key in base64 format
 const TEST_PK_BASE64 = import.meta.env.VITE_TASKON_PRIVATE_KEY as string;
 
-export const signMessage = async (clientId: string, type: 'Email' | 'evm', value: string): Promise<{
+export const signMessage = async (clientId: string, type: 'Email', value: string): Promise<{
   signature: string;
   timestamp: number;
 }> => {
