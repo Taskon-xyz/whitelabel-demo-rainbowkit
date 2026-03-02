@@ -1,11 +1,4 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { BindConflictData, TaskCompletedData, TaskOnEmbed } from '@taskon/embed';
 
 interface EmailClientProps {
@@ -16,9 +9,11 @@ interface EmailClientProps {
 
 export interface EmailClientRef {
   setLanguage: (language: string) => Promise<void>;
+  login: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-const EMBED_HANDSHAKE_TIMEOUT_MS = 10000;
+type PendingAction = { type: 'login'; email: string } | { type: 'logout' } | null;
 
 const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
   ({ currentEmail, onSignature, onRequireDemoLogin }, ref) => {
@@ -27,22 +22,17 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
     const currentEmailRef = useRef(currentEmail);
     const onRequireDemoLoginRef = useRef(onRequireDemoLogin);
     const loginToTaskOnRef = useRef<(email: string) => Promise<void>>(async () => {});
+    const logoutFromTaskOnRef = useRef<() => Promise<void>>(async () => {});
+    const pendingActionRef = useRef<PendingAction>(null);
 
-    const [isEmbedInitialized, setIsEmbedInitialized] = useState(false);
-
-    // Keep refs synced so one-time event listeners can read latest state.
-    useEffect(() => {
-      currentEmailRef.current = currentEmail;
-    }, [currentEmail]);
-
-    useEffect(() => {
-      onRequireDemoLoginRef.current = onRequireDemoLogin;
-    }, [onRequireDemoLogin]);
+    currentEmailRef.current = currentEmail;
+    onRequireDemoLoginRef.current = onRequireDemoLogin;
 
     const loginToTaskOn = useCallback(
       async (email: string) => {
         if (!embedRef.current || !embedRef.current.initialized) {
-          console.log('[TaskOn][Email] Login skipped: embed is not ready yet');
+          pendingActionRef.current = { type: 'login', email };
+          console.log('[TaskOn][Email] Login deferred: embed is not ready yet', { email });
           return;
         }
 
@@ -67,14 +57,10 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
       [onSignature]
     );
 
-    useEffect(() => {
-      loginToTaskOnRef.current = loginToTaskOn;
-    }, [loginToTaskOn]);
-
     const logoutFromTaskOn = useCallback(async () => {
-      // Keep a stable callback so effects do not re-run on every render.
       if (!embedRef.current || !embedRef.current.initialized) {
-        console.log('[TaskOn][Email] Logout skipped: embed is not ready yet');
+        pendingActionRef.current = { type: 'logout' };
+        console.log('[TaskOn][Email] Logout deferred: embed is not ready yet');
         return;
       }
 
@@ -87,65 +73,38 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
       }
     }, []);
 
-    // Sync host demo session to TaskOn session.
-    // This runs whenever host session changes and after embed initialization.
-    const syncSessionToTaskOn = useCallback(async () => {
-      const latestEmail = currentEmailRef.current.trim();
+    loginToTaskOnRef.current = loginToTaskOn;
+    logoutFromTaskOnRef.current = logoutFromTaskOn;
 
-      if (!isEmbedInitialized || !embedRef.current || !embedRef.current.initialized) {
-        console.log('[TaskOn][Email] Session sync deferred: embed is not initialized yet', {
-          hasHostSession: Boolean(latestEmail),
-        });
+    const flushPendingAction = useCallback(async () => {
+      const pendingAction = pendingActionRef.current;
+      if (!pendingAction) {
         return;
       }
 
-      if (latestEmail) {
-        console.log('[TaskOn][Email] Host session detected, syncing login now:', latestEmail);
-        await loginToTaskOn(latestEmail);
+      pendingActionRef.current = null;
+      if (pendingAction.type === 'login') {
+        await loginToTaskOnRef.current(pendingAction.email);
         return;
       }
 
-      console.log('[TaskOn][Email] No host session, syncing logout now');
-      await logoutFromTaskOn();
-    }, [isEmbedInitialized, loginToTaskOn, logoutFromTaskOn]);
+      await logoutFromTaskOnRef.current();
+    }, []);
 
     useEffect(() => {
       if (!containerRef.current) return;
 
       const rawBaseUrl = import.meta.env.VITE_TASKON_BASE_URL as string;
-      // IMPORTANT:
-      // The currently used npm package (@taskon/embed@1.2.1) compares Penpal
-      // allowed origins with `baseUrl` directly in runtime. If baseUrl has a
-      // trailing slash (e.g. https://xx.com/), handshake can hang forever
-      // because postMessage event.origin is `https://xx.com` (without slash).
-      // To keep demo stable, normalize to origin explicitly here.
-      const normalizedBaseUrl = (() => {
-        try {
-          return new URL(rawBaseUrl).origin;
-        } catch {
-          return rawBaseUrl.replace(/\/+$/, '');
-        }
-      })();
 
       console.log('[TaskOn][Email] Embed initialization started', {
         rawBaseUrl,
-        normalizedBaseUrl,
-        handshakeTimeoutMs: EMBED_HANDSHAKE_TIMEOUT_MS,
       });
 
       const embed = new TaskOnEmbed({
-        baseUrl: normalizedBaseUrl,
+        baseUrl: rawBaseUrl,
         containerElement: containerRef.current,
         language: 'en',
-        handshakeTimeoutMs: EMBED_HANDSHAKE_TIMEOUT_MS,
       });
-
-      const initWatchdog = window.setTimeout(() => {
-        console.warn('[TaskOn][Email] Embed initialization still pending after timeout window', {
-          timeoutMs: EMBED_HANDSHAKE_TIMEOUT_MS,
-          hint: 'Potential penpal handshake issue (origin mismatch or blocked iframe communication)',
-        });
-      }, EMBED_HANDSHAKE_TIMEOUT_MS + 1000);
 
       const handleRouteChanged = (fullPath: string) => {
         console.log('TaskOn route changed:', fullPath);
@@ -180,28 +139,27 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
       embed.on('bindConflict', handleBindConflict);
       embed.on('loginRequired', handleLoginRequired);
 
-      embed.init().then(() => {
-        embedRef.current = embed;
-        setIsEmbedInitialized(true);
-        console.log('[TaskOn][Email] Embed initialized');
-      }).catch((error) => {
-        console.error('[TaskOn][Email] Embed initialization failed:', error);
-      }).finally(() => {
-        window.clearTimeout(initWatchdog);
-      });
+      embed
+        .init()
+        .then(async () => {
+          embedRef.current = embed;
+          console.log('[TaskOn][Email] Embed initialized');
+          await flushPendingAction();
+        })
+        .catch((error) => {
+          console.error('[TaskOn][Email] Embed initialization failed:', error);
+        });
 
       return () => {
-        window.clearTimeout(initWatchdog);
         console.log('[TaskOn][Email] Embed destroyed');
         embed.destroy();
         embedRef.current = null;
-        setIsEmbedInitialized(false);
       };
-    }, []);
+    }, [flushPendingAction]);
 
     const setLanguage = useCallback(
       async (newLanguage: string) => {
-        if (!embedRef.current || !isEmbedInitialized) {
+        if (!embedRef.current || !embedRef.current.initialized) {
           console.log('Embed not ready, language will be applied when available');
           return;
         }
@@ -213,29 +171,17 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
           console.error('Failed to change language:', error);
         }
       },
-      [isEmbedInitialized]
+      []
     );
-
-    useEffect(() => {
-      console.log('[TaskOn][Email] Host session changed, attempting session sync:', {
-        hasHostSession: Boolean(currentEmail),
-        currentEmail,
-      });
-      void syncSessionToTaskOn();
-    }, [currentEmail, syncSessionToTaskOn]);
-
-    useEffect(() => {
-      if (!isEmbedInitialized) return;
-      console.log('[TaskOn][Email] Embed became ready, attempting immediate session sync');
-      void syncSessionToTaskOn();
-    }, [isEmbedInitialized, syncSessionToTaskOn]);
 
     useImperativeHandle(
       ref,
       () => ({
+        login: loginToTaskOn,
+        logout: logoutFromTaskOn,
         setLanguage,
       }),
-      [setLanguage]
+      [loginToTaskOn, logoutFromTaskOn, setLanguage]
     );
 
     return <div ref={containerRef} className="w-full h-full" />;

@@ -15,6 +15,7 @@ export default function EmailPage() {
     if (savedEmail) {
       console.log('[Demo][Email] Restored existing demo session from storage:', savedEmail);
       setCurrentEmail(savedEmail);
+      void emailClientRef.current?.login(savedEmail);
     }
   }, []);
 
@@ -25,7 +26,8 @@ export default function EmailPage() {
       setCurrentEmail(email);
       setIsModalOpen(false);
       localStorage.setItem('demo_current_email', email);
-      console.log('[Demo][Email] Login successful, TaskOn login will be triggered by session effect:', email);
+      console.log('[Demo][Email] Login successful, triggering TaskOn login now:', email);
+      await emailClientRef.current?.login(email);
     } catch (error) {
       console.error('[Demo][Email] Login failed:', error);
       alert('Demo login failed. Please try again.');
@@ -34,12 +36,13 @@ export default function EmailPage() {
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(async () => {
     console.log('[Demo][Email] Logout flow started');
     setCurrentEmail('');
     localStorage.removeItem('demo_current_email');
-    console.log('[Demo][Email] Logout successful, TaskOn logout will be triggered by session effect');
-  };
+    console.log('[Demo][Email] Logout successful, triggering TaskOn logout now');
+    await emailClientRef.current?.logout();
+  }, []);
 
   const generateSignature = useCallback(async (email: string) => {
     const clientId = import.meta.env.VITE_TASKON_CLIENT_ID as string;
