@@ -13,10 +13,11 @@ export default function EvmClient() {
   const [isEmbedInitialized, setIsEmbedInitialized] = useState(false);
 
   const [isEvmLoggedIn, setIsEvmLoggedIn] = useState(false);
+  const [isManualDisconnecting, setIsManualDisconnecting] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
   
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { disconnectAsync } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const { data: walletClient } = useWalletClient();
 
@@ -50,7 +51,8 @@ export default function EvmClient() {
       baseUrl: import.meta.env.VITE_TASKON_BASE_URL as string,
       containerElement: containerRef.current,
       language: 'en', // Use default language for initialization
-      tabsInclude: ["home", "quests", "leaderboard", "incentives", "benefit", "wheelOfFortune", "events", "milestone"]
+      tabsInclude: ["home", "quests", "leaderboard", "incentives", "benefit", "wheelOfFortune", "events", "milestone"],
+      isDev: true
     });
 
     const buildParentPathFromIframeRoute = (fullPath: string) => {
@@ -198,15 +200,31 @@ export default function EvmClient() {
     }
   }, [isConnected, address, walletClient]);
 
-  const logout = () => {
-    if (!embedRef.current) return;
-    
-    // Logout from TaskOn first (keep auth cache by default), then disconnect wallet
-    embedRef.current.logout({ clearAuth: true }); // Default: { clearAuth: false }
+  const logout = useCallback(async () => {
+    if (isManualDisconnecting) {
+      return;
+    }
+
+    setIsManualDisconnecting(true);
     setIsEvmLoggedIn(false);
     localStorage.removeItem('taskon_evm_login_state');
-    disconnect();
-  };
+
+    if (embedRef.current?.initialized) {
+      try {
+        await embedRef.current.logout({ clearAuth: true }); // Default: { clearAuth: false }
+      } catch (error) {
+        console.warn('TaskOn logout failed during disconnect:', error);
+      }
+    }
+
+    try {
+      await disconnectAsync();
+    } catch (error) {
+      console.error('Wallet disconnect failed:', error);
+    } finally {
+      setIsManualDisconnecting(false);
+    }
+  }, [disconnectAsync, isManualDisconnecting]);
 
   // Handle automatic logout when wallet disconnects externally (e.g., from wallet extension)
   useEffect(() => {
@@ -223,11 +241,11 @@ export default function EvmClient() {
   // Auto-login when wallet connects and embed is ready
   useEffect(() => {
     // Only auto-login when all conditions are met AND wallet is actually connected
-    if (isConnected && isEmbedInitialized && !isEvmLoggedIn && address && walletClient) {
+    if (!isManualDisconnecting && isConnected && isEmbedInitialized && !isEvmLoggedIn && address && walletClient) {
       console.log('Auto-login triggered: wallet connected and embed ready');
       loginWithWallet();
     }
-  }, [isConnected, isEmbedInitialized, isEvmLoggedIn, address, walletClient, loginWithWallet]);
+  }, [isManualDisconnecting, isConnected, isEmbedInitialized, isEvmLoggedIn, address, walletClient, loginWithWallet]);
 
   // Language switching function
   const changeLanguage = useCallback(async (language: string) => {
