@@ -15,7 +15,7 @@ export default function EmailPage() {
     if (savedEmail) {
       console.log('[Demo][Email] Restored existing demo session from storage:', savedEmail);
       setCurrentEmail(savedEmail);
-      void emailClientRef.current?.login(savedEmail);
+      console.log('[Demo][Email] Skip TaskOn login on refresh, rely on SDK auth cache');
     }
   }, []);
 
