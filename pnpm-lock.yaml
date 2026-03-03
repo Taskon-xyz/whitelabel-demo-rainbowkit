@@ -12,8 +12,8 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       '@taskon/embed':
-        specifier: ^1.2.1
-        version: 1.2.1
+        specifier: ^1.2.2
+        version: 1.2.2
       react:
         specifier: ^19.1.0
         version: 19.1.1
@@ -530,8 +530,8 @@ packages:
   '@tailwindcss/postcss@4.1.12':
     resolution: {integrity: sha512-5PpLYhCAwf9SJEeIsSmCDLgyVfdBhdBpzX1OJ87anT9IVR0Z9pjM0FNixCAUAHGnMBGB8K99SwAheXrT0Kh6QQ==}
 
-  '@taskon/embed@1.2.1':
-    resolution: {integrity: sha512-Qry4j5hJCB89g586EkYlApD1j5QpTEXxxAD4OR2XqoDQAu7zM/fusT4ZVOI1Z/d+s2TSNFRHx1KxStVtbs8A+g==}
+  '@taskon/embed@1.2.2':
+    resolution: {integrity: sha512-/CXTsYiIinPewqgK8BSb9QIqjvn4nS6MPPshNkfcg6TI6rcwVj/3z4zr90rVfJAyAQDGvKsHL/2WU0mux5J4DA==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -1252,7 +1252,7 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.1.12
 
-  '@taskon/embed@1.2.1':
+  '@taskon/embed@1.2.2':
     dependencies:
       '@types/eventemitter3': 1.2.0
       eventemitter3: 5.0.1
