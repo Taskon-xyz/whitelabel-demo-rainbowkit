@@ -32,7 +32,13 @@ Required variables:
 VITE_TASKON_BASE_URL
 VITE_TASKON_CLIENT_ID
 VITE_TASKON_PRIVATE_KEY
+VITE_TASKON_IS_DEV
 ```
+
+`VITE_TASKON_IS_DEV` controls which OAuth center is used by `@taskon/embed`:
+
+- `true` / `1`: use `https://stage.generalauthservice.com`
+- `false` / empty: use `https://generalauthservice.com`
 
 ### Start Development Server
 

@@ -15,6 +15,20 @@ export interface EmailClientRef {
 
 type PendingAction = { type: 'login'; email: string } | { type: 'logout' } | null;
 
+/**
+ * Parse boolean-like environment variables.
+ * Supported truthy values:
+ * - "true"
+ * - "1"
+ */
+const parseBooleanEnv = (value: string | undefined): boolean => {
+  if (!value) {
+    return false;
+  }
+  const normalizedValue = value.trim().toLowerCase();
+  return normalizedValue === 'true' || normalizedValue === '1';
+};
+
 const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
   ({ currentEmail, onSignature, onRequireDemoLogin }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -95,15 +109,25 @@ const EmailClient = forwardRef<EmailClientRef, EmailClientProps>(
       if (!containerRef.current) return;
 
       const rawBaseUrl = import.meta.env.VITE_TASKON_BASE_URL as string;
+      /**
+       * Controls OAuth environment routing in @taskon/embed.
+       * - true  => stage.generalauthservice.com
+       * - false => generalauthservice.com
+       */
+      const rawIsDev = import.meta.env.VITE_TASKON_IS_DEV as string | undefined;
+      const isDev = parseBooleanEnv(rawIsDev);
 
       console.log('[TaskOn][Email] Embed initialization started', {
         rawBaseUrl,
+        rawIsDev,
+        isDev,
       });
 
       const embed = new TaskOnEmbed({
         baseUrl: rawBaseUrl,
         containerElement: containerRef.current,
         language: 'en',
+        isDev,
       });
 
       const handleRouteChanged = (fullPath: string) => {
